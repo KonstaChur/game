@@ -1,0 +1,10 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /game-service
+
+spring:
+  application:
+    name: game-service
+
+value: 2
