@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="user-service" />
         <module name="game-service" />
         <module name="Auth-Service" />
       </profile>
@@ -15,7 +16,6 @@
       <module name="auth-service" target="17" />
       <module name="email-service" target="17" />
       <module name="mail-service" target="17" />
-      <module name="user-service" target="17" />
       <module name="userservice" target="17" />
     </bytecodeTargetLevel>
   </component>
@@ -24,6 +24,7 @@
       <module name="Auth-Service" options="-parameters" />
       <module name="auth-service" options="-parameters" />
       <module name="email-service" options="-parameters" />
+      <module name="game" options="" />
       <module name="game-service" options="-parameters" />
       <module name="mail-service" options="-parameters" />
       <module name="user-service" options="-parameters" />

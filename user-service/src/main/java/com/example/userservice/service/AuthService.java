@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Slf4j
 public class AuthService {
+
     private final RestTemplate restTemplate;
     private final String authServiceUrl;
     private final String authServiceUser;

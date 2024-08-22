@@ -20,7 +20,7 @@ public class TokenManager {
     }
 
     //TODO написать логику проверки истечения срока действия токена
-    private boolean isTokenExpired() {
+    public boolean isTokenExpired() {
         return false;
     }
 }
