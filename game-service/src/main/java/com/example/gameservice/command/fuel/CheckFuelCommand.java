@@ -1,45 +1,39 @@
 package com.example.gameservice.command.fuel;
 
+import com.example.gameservice.DTO.FuelDto;
 import com.example.gameservice.command.ICommand;
 import com.example.gameservice.context.CommandContext;
 import com.example.gameservice.exception.CommandException;
-import com.example.gameservice.messaging.Producer;
+import com.example.gameservice.service.CommandContextHolder;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("checkfuelcommand")
+@Component("checkFuel")
 @Slf4j
+@RequiredArgsConstructor
 public class CheckFuelCommand implements ICommand {
-
-    @Autowired
-    private CommandContext commandContext;
-    @Autowired
-    private Producer producer;
 
     @Override
     public void execute() {
+        CommandContext commandContext = CommandContextHolder.getContext();
+        if (commandContext == null) {
+            throw new IllegalStateException("Command context is not set");
+        }
+
         try {
             String json = commandContext.getCommandData();
             Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
-            String idUser = jsonObject.getAsJsonObject("data").get("id_user").getAsString();
+            FuelDto fuelDto = gson.fromJson(json, FuelDto.class);
 
-
-            JsonObject data = jsonObject.getAsJsonObject("data");
-            double currentFuel = data.get("currentFuel").getAsDouble();
-            double fuelConsumption = data.get("fuelConsumption").getAsDouble();
-
-            double remainingFuel = currentFuel - fuelConsumption;
-            log.info("Remaining fuel: {}", remainingFuel);
+            double remainingFuel = fuelDto.getCurrentFuel() - fuelDto.getFuelConsumption();
 
             if (remainingFuel < 0) {
-                String errorMessage = "Fuel has run out";
-                producer.sendMessage(errorMessage, idUser);
+                String errorMessage = "Нехватка топлива";
                 throw new CommandException(errorMessage);
             }
+            log.info("Проверка топлива прошла успешно");
         } catch (CommandException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

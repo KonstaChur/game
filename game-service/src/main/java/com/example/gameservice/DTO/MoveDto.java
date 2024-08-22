@@ -1,12 +1,16 @@
 package com.example.gameservice.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class MoveDto {
 
     @NotNull
@@ -20,23 +24,4 @@ public class MoveDto {
 
     @NotNull
     Velocity velocity;
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    public static class Position {
-        @NotNull
-        private double x;
-        @NotNull
-        private double y;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    public static class Velocity {
-        @NotNull
-        private double x;
-        @NotNull
-        private double y;
-    }
-
 }

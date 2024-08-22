@@ -1,40 +1,41 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.model.User;
-import com.example.userservice.service.UserService;
+import com.example.userservice.service.AuthService;
+import com.example.userservice.service.Move;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/user")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-
-    private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        if (userService.userExists(user.getEmail())) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-        User registeredUser = userService.registerUser(user);
-        return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
-    }
+    private final AuthService authService;
+    private final Move move;
 
     @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint() {
-        return new ResponseEntity<>("Тестовый эндпоинт работает!", HttpStatus.OK);
+    public String test (){
+        return "Тест прошел успешно";
+    }
+
+    @GetMapping("/testAuth")
+    public String testAuth (){
+        String test = authService.test();
+        return "Тест прошел успешно"+test;
+    }
+
+    @GetMapping("/authenticate")
+    public String authenticate() {
+        return authService.authenticate();
+    }
+
+    @GetMapping("/move")
+    public String sendCommands() throws IOException {
+         return move.executeCommands();
     }
 }

@@ -1,47 +1,61 @@
 package com.example.gameservice.command.move;
 
 import com.example.gameservice.DTO.MoveDto;
+import com.example.gameservice.DTO.Position;
+import com.example.gameservice.DTO.Velocity;
 import com.example.gameservice.command.ICommand;
-import com.example.gameservice.config.RabbitConfig;
 import com.example.gameservice.context.CommandContext;
+import com.example.gameservice.service.CommandContextHolder;
+import com.example.gameservice.service.GameObject;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("movecommand")
+@Component("move")
 @Slf4j
+@RequiredArgsConstructor
 public class MoveCommand implements ICommand {
 
-    @Autowired
-    private CommandContext commandContext;
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private final GameObject gameObject;
 
     @Override
     public void execute() {
-        String json = commandContext.getCommandData();
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
+        CommandContext commandContext = CommandContextHolder.getContext();
+        if (commandContext == null) {
+            log.error("Command context is not available.");
+            return;
+        }
 
-        JsonObject data = jsonObject.getAsJsonObject("data");
-        MoveDto moveDto = gson.fromJson(data, MoveDto.class);
+        String json = commandContext.getCommandData();
+        if (json == null || json.trim().isEmpty()) {
+            log.warn("No command data provided.");
+            return;
+        }
+
+        Gson gson = new Gson();
+        MoveDto moveDto;
+        try {
+            moveDto = gson.fromJson(json, MoveDto.class);
+        } catch (Exception e) {
+            log.error("Error parsing command data: {}", e.getMessage());
+            return;
+        }
+
+        if (moveDto == null) {
+            log.warn("Command data could not be parsed into MoveDto.");
+            return;
+        }
 
         double newX = moveDto.getPosition().getX() + moveDto.getVelocity().getX();
         double newY = moveDto.getPosition().getY() + moveDto.getVelocity().getY();
         moveDto.getPosition().setX(newX);
         moveDto.getPosition().setY(newY);
 
-        log.info("Обновленные координаты движения: {}", moveDto);
+        gameObject.setId_game(moveDto.getId_game());
+        gameObject.setId_user(moveDto.getId_user());
+        gameObject.setPosition(new Position(newX, newY));
 
-        String updatedMoveDtoJson = gson.toJson(moveDto);
-
-        String routingKey = moveDto.getId_user();
-        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, routingKey, updatedMoveDtoJson);
-
-        log.info("Отправлено обновленное движение в RabbitMQ с ключом маршрутизации: {}", routingKey);
+        log.info("Updated position: {}", moveDto);
     }
 }

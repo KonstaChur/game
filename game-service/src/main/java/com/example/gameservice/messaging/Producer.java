@@ -24,7 +24,6 @@ public class Producer {
         try {
 
             String jsonMessage = objectMapper.writeValueAsString(message);
-
             rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME, key, jsonMessage);
 
         } catch (JsonProcessingException e) {
@@ -34,3 +33,4 @@ public class Producer {
         }
     }
 }
+

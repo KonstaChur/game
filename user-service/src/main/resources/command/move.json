@@ -1,0 +1,19 @@
+{
+  "commands": [
+    {
+      "name": "movecommand",
+      "data": {
+        "id_user": "User_123",
+        "id_game": "game456",
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "velocity": {
+          "x": 10.0,
+          "y": 10.0
+        }
+      }
+    }
+  ]
+}

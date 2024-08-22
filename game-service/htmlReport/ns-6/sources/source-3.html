@@ -1,0 +1,225 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CommandExecutorService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.example.gameservice.service</a>
+</div>
+
+<h1>Coverage Summary for Class: CommandExecutorService (com.example.gameservice.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommandExecutorService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2%
+  </span>
+  <span class="absValue">
+    (1/49)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.example.gameservice.service;
+&nbsp;
+&nbsp;import com.example.gameservice.command.ICommand;
+&nbsp;import com.example.gameservice.command.message.MessageCommand;
+&nbsp;import com.example.gameservice.context.CommandContext;
+&nbsp;import com.example.gameservice.exception.ValidationException;
+&nbsp;import com.example.gameservice.messaging.Producer;
+&nbsp;import com.example.gameservice.state.ExecutionState;
+&nbsp;import com.example.gameservice.validation.CommandValidator;
+&nbsp;import com.fasterxml.jackson.databind.JsonNode;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.google.gson.Gson;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Map;
+&nbsp;
+<b class="fc">&nbsp;@Service</b>
+&nbsp;@Slf4j
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class CommandExecutorService {
+&nbsp;
+&nbsp;    private final Map&lt;String, ICommand&gt; commandBeans;
+&nbsp;    private final Map&lt;String, CommandValidator&gt; commandValidators;
+&nbsp;    private final CommandContext commandContext;
+&nbsp;    private final ObjectMapper objectMapper;
+&nbsp;    private final Producer producer;
+&nbsp;    private final ExecutionState executionState;
+&nbsp;    private final MessageCommand messageCommand;
+&nbsp;    private final TokenValidationService tokenValidationService;
+&nbsp;
+&nbsp;    private String routingKey = &quot;&quot;;
+&nbsp;
+<b class="nc">&nbsp;    public void executeCommands(String token, String json) throws IOException {</b>
+<b class="nc">&nbsp;        long threadId = Thread.currentThread().getId();</b>
+&nbsp;        log.info(&quot;Execution started in thread: {}&quot;, threadId);
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;        JsonNode rootNode = objectMapper.readTree(json);</b>
+&nbsp;        JsonNode commandsNode = rootNode.get(&quot;commands&quot;);
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;        if (commandsNode.get(0).get(&quot;data&quot;) != null) {</b>
+&nbsp;            routingKey = commandsNode.get(0).get(&quot;data&quot;).get(&quot;id_user&quot;).asText();
+&nbsp;        }
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;        if (routingKey == null) {</b>
+&nbsp;            sendMessageToRabbit(&quot;idUser is null&quot;);
+&nbsp;            return;
+&nbsp;        }
+<b class="nc">&nbsp;</b>
+&nbsp;        boolean isValidToken = tokenValidationService.validateToken(token, routingKey);
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;        if (!isValidToken) {</b>
+<b class="nc">&nbsp;            log.error(&quot;Неверный токен&quot;);</b>
+&nbsp;            throw new IllegalArgumentException(&quot;Неверный токен&quot;);
+&nbsp;        }
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;        for (JsonNode commandNode : commandsNode) {</b>
+<b class="nc">&nbsp;            if (executionState.isStopExecution()) {</b>
+&nbsp;                log.info(&quot;Stopping execution in thread: {}&quot;, threadId);
+&nbsp;                return;
+&nbsp;            }
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;            String commandName = commandNode.get(&quot;name&quot;).asText();</b>
+&nbsp;            JsonNode dataNode = commandNode.get(&quot;data&quot;);
+<b class="nc">&nbsp;</b>
+&nbsp;            commandContext.setCommandData(dataNode.toString());
+<b class="nc">&nbsp;            ICommand command = commandBeans.get(commandName);</b>
+<b class="nc">&nbsp;</b>
+&nbsp;            if (!validateCommand(commandName, dataNode)) {
+<b class="nc">&nbsp;                executionState.setStopExecution(true); // Устанавливаем флаг на true, если валидация не прошла</b>
+<b class="nc">&nbsp;                log.info(&quot;Stopping execution due to validation failure in thread: {}&quot;, threadId);</b>
+<b class="nc">&nbsp;                return; // Завершаем выполнение метода и текущего потока</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            if (command != null) {
+<b class="nc">&nbsp;                try {</b>
+&nbsp;                    command.execute();
+<b class="nc">&nbsp;                } catch (RuntimeException e) {</b>
+<b class="nc">&nbsp;                    executionState.setStopExecution(true); // Устанавливаем флаг на true, если произошла ошибка выполнения команды</b>
+<b class="nc">&nbsp;                    log.error(&quot;Error executing command &#39;{}&#39; in thread: {} - {}&quot;, commandName, threadId, e.getMessage());</b>
+<b class="nc">&nbsp;                    sendMessageToRabbit(&quot;Error executing command: &quot; + commandName + &quot; - &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;                    return; // Завершаем выполнение метода и текущего потока</b>
+&nbsp;                }
+<b class="nc">&nbsp;            } else {</b>
+&nbsp;                executionState.setStopExecution(true); // Устанавливаем флаг на true, если команда неизвестна
+<b class="nc">&nbsp;                log.error(&quot;Unknown command &#39;{}&#39; in thread: {}&quot;, commandName, threadId);</b>
+<b class="nc">&nbsp;                sendMessageToRabbit(&quot;Unknown command: &quot; + commandName);</b>
+<b class="nc">&nbsp;                return; // Завершаем выполнение метода и текущего потока</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;</b>
+&nbsp;
+&nbsp;        executionState.clear();
+<b class="nc">&nbsp;</b>
+&nbsp;        // Отправляем сообщение игроку после успешного выполнения всех команд
+&nbsp;        log.info(&quot;All commands executed successfully in thread: {}&quot;, threadId);
+<b class="nc">&nbsp;        messageCommand.execute();</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    private boolean validateCommand(String commandName, JsonNode dataNode) {
+&nbsp;        CommandValidator validator = commandValidators.get(commandName + &quot;validator&quot;);
+<b class="nc">&nbsp;        if (validator != null) {</b>
+<b class="nc">&nbsp;            try {</b>
+&nbsp;                validator.validate(dataNode);
+<b class="nc">&nbsp;                return true;</b>
+<b class="nc">&nbsp;            } catch (ValidationException e) {</b>
+<b class="nc">&nbsp;                sendMessageToRabbit(&quot;Validation error in command: &quot; + commandName + &quot; - &quot; + e.getMessage());</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        } else {</b>
+&nbsp;            sendMessageToRabbit(&quot;No validator found for command: &quot; + commandName);
+<b class="nc">&nbsp;        }</b>
+&nbsp;        return false;
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    private void sendMessageToRabbit(String errorMessage) {
+&nbsp;        log.error(errorMessage);
+<b class="nc">&nbsp;        producer.sendMessage(errorMessage, routingKey);</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-08-21 12:41</div>
+</div>
+</body>
+</html>

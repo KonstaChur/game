@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
   servlet:
     context-path: /game-service
 
@@ -8,3 +8,18 @@ spring:
     name: game-service
 
 value: 2
+
+areal:
+  stepX : 10
+  stepY : 10
+
+object :
+  radius : 10
+
+threads-value : 5
+
+auth-service:
+  url: http://localhost:8085/auth-service
+  user: User_123
+  password: 123
+

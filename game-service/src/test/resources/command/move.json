@@ -1,0 +1,11 @@
+{
+  "commands": [
+    {
+      "name": "movecommand",
+      "data": {
+        "id_user": "User_123",
+        "id_game": "game456"
+      }
+    }
+  ]
+}
