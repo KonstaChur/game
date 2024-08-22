@@ -7,13 +7,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="user-service" />
+        <module name="game-service" />
+        <module name="Auth-Service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="auth-service" target="17" />
       <module name="email-service" target="17" />
-      <module name="game-service" target="17" />
       <module name="mail-service" target="17" />
       <module name="user-service" target="17" />
       <module name="userservice" target="17" />
@@ -21,6 +21,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Auth-Service" options="-parameters" />
       <module name="auth-service" options="-parameters" />
       <module name="email-service" options="-parameters" />
       <module name="game-service" options="-parameters" />
