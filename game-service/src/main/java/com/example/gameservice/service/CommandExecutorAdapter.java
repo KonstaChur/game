@@ -14,7 +14,6 @@ public class CommandExecutorAdapter {
     }
 
     public void execute() {
-        // Присвойте CommandContext команде через специальный метод или через какую-то другую логику
         CommandContextHolder.setContext(commandContext);
         try {
             command.execute();
