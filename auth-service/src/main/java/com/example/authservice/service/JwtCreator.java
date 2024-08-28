@@ -4,6 +4,7 @@ import com.example.authservice.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.Base64;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class JwtCreator {
     private final PrivateKey privateKey;
     @SneakyThrows

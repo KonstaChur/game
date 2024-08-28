@@ -24,12 +24,12 @@ public class AuthController {
 
     @GetMapping("/test")
     public String test(){
-        return "Тест прошел успешно";
+        return "Тест сервиса авторизации прошел успешно";
     }
 
     @GetMapping("/authenticate")
     public String authenticate(@RequestParam String user, @RequestParam String password) {
-        log.info("запрос");
+        log.info("Запрос токена");
         return users.stream()
                 .filter(e -> e.getName().equals(user) && e.getPassword().equals(password))
                 .findFirst()
@@ -39,7 +39,7 @@ public class AuthController {
 
     @GetMapping("/validate")
     public boolean validateJwt(@RequestParam String token, @RequestParam String user) {
-        log.info("проверка");
+        log.info("проверка токена");
         return jwtCreator.validateJwt(user, token);
     }
 

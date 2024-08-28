@@ -18,7 +18,7 @@ public class TokenValidationService {
     private RestTemplate restTemplate;
 
     public boolean validateToken(String token, String user) {
-        String url = String.format("http://localhost/validate?user=%s&token=%s", user, token);
+        String url = String.format(authServiceUrl+"/validate?user=%s&token=%s", user, token);
         try {
             ResponseEntity<Boolean> response = restTemplate.getForEntity(url, Boolean.class);
             return response != null && Boolean.TRUE.equals(response.getBody());

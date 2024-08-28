@@ -20,13 +20,13 @@ public class UserController {
 
     @GetMapping("/test")
     public String test (){
-        return "Тест прошел успешно";
+        return "Тест user-service прошел успешно";
     }
 
     @GetMapping("/testAuth")
     public String testAuth (){
         String test = authService.test();
-        return "Тест прошел успешно"+test;
+        return "Тест user-service прошел успешно + "+test;
     }
 
     @GetMapping("/authenticate")
@@ -35,7 +35,9 @@ public class UserController {
     }
 
     @GetMapping("/move")
-    public String sendCommands() throws IOException {
+    public String moveCommands() throws IOException {
          return move.executeCommands();
     }
 }
+
+

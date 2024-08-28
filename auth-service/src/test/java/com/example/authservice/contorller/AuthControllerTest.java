@@ -28,7 +28,7 @@ class AuthControllerTest {
     @Test
     void test_testMethod() {
         String response = authController.test();
-        assertEquals("Тест прошел успешно", response);
+        assertEquals("Тест сервиса авторизации прошел успешно", response);
     }
 
     @Test

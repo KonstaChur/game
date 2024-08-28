@@ -1,0 +1,37 @@
+{
+  "commands": [
+    {
+      "name": "checkFuel",
+      "data": {
+        "id_user": "User_123",
+        "id_game": "game456",
+        "currentFuel": 100.0,
+        "fuelConsumption": 10.0
+      }
+    },
+    {
+      "name": "move",
+      "data": {
+        "id_user": "User_123",
+        "id_game": "game456",
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "velocity": {
+          "x": 10.0,
+          "y": 10.0
+        }
+      }
+    },
+    {
+      "name": "burnFuel",
+      "data": {
+        "id_user": "User_123",
+        "id_game": "game456",
+        "currentFuel": 100.0,
+        "fuelConsumption": 10.0
+      }
+    }
+  ]
+}

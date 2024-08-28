@@ -27,8 +27,8 @@ public class AuthService {
 
     public String authenticate() {
         String url = String.format("%s/authenticate?user=%s&password=%s", authServiceUrl, authServiceUser, authServicePassword);
-        log.info("url = "+url);
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        log.info("Получение токена");
         return response.getBody();
     }
 

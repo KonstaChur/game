@@ -34,13 +34,14 @@ public class CollisionCheckCommand implements ICommand {
         int x = (int) (position.getX() / stepX);
         int y = (int) (position.getY() / stepY);
 
-        String arealId = "cell_" + (int)x + "_" + (int)y;
+        String arealId = "cell_" + x + "_" + y;
         try {
             if (checkService.collisionCheck(arealId)) {
                 throw new CommandException("Collision detected for object: " + gameObject.getId_user());
             } else {
                 checkArealId(arealId);
                 arealsContext.addObjectToSurrounding(arealId, gameObject);
+                log.info("Проверка пройдена успешно");
             }
         } catch (CommandException e) {
             log.error("Error during collision check: {}", e.getMessage());
